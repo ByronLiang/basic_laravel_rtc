@@ -1,6 +1,8 @@
 <template>
     <div>
-        <div v-for="message in messages" class="chat-log">
+        <div>在线人数: <span>{{ online_number.length }}</span></div>
+        <div v-for="(message, index) in messages" 
+            class="chat-log" :key="index">
             <chat-message :message="message"></chat-message>
         </div>
     </div>
@@ -8,7 +10,7 @@
 
 <script>
     export default {
-        props: ['messages'],
+        props: ['messages', 'online_number'],
     }
 </script>
 

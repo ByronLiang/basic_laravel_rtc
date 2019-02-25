@@ -30,7 +30,8 @@ const app = new Vue({
     el: '#app',
     data() {
         return {
-            messages: []
+            messages: [],
+            usersInRoom: [],
         }
     },
     created() {
@@ -43,19 +44,25 @@ const app = new Vue({
             Echo.join('chatroom')
                 .here((users) => {
                     console.log(users);
+                    this.usersInRoom = users;
                 })
                 .joining((user) => {// 方法会在其他新用户加入到频道时被执行
                     console.log(user.name);
-                    this.$Notice.success({
-                        title: '新用户加入提醒',
-                        desc: '用户:' + user.name + '加入房间'
-                    });
+                    // 进行校验 避免在房间内刷新, 导致人数不断递增
+                    if (! this.usersInRoom.find((item) => item.id = user.id)) {
+                        this.usersInRoom.push(user);
+                        this.$Notice.success({
+                            title: '新用户加入提醒',
+                            desc: '用户:' + user.name + '加入房间'
+                        });
+                    }
                 })
                 .listen('PushMessageEvent', (e) => {
                     e.message.user = e.user;
                     this.messages.push(e.message)
                 })
                 .leaving((user) => { //会在其他用户退出频道时被执行
+                    this.usersInRoom = this.usersInRoom.filter((u) => u != user);
                     this.$Notice.error({
                         title: '用户退出提醒',
                         desc: '用户:' + user.name + '退出房间'
